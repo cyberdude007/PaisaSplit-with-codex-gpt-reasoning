@@ -1,0 +1,55 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+build/
+.dart_server/
+.idea/
+*.iml
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+
+# Generated files
+lib/gen/
+!lib/gen/.gitkeep
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/.symlinks/
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/gradle/
+android/local.properties
+android/app/key.jks
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.*
+macos/Flutter/ephemeral/
+
+# Web
+web/.dart_tool/
+
+# Windows
+windows/Runner/GeneratedPluginRegistrant.*
+
+# Linux
+linux/flutter/ephemeral/
+
+# Coverage
+coverage/
+
+# Symbolication
+app.*.symbols
+
+# Crashlytics
+**/firebase_app_id_file.json
