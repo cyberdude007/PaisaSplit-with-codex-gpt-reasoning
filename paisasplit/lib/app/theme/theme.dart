@@ -22,22 +22,27 @@ ThemeData buildPaisaTheme() {
     onError: Color(0xFF1F0A0A),
     errorContainer: Color(0xFF4C1111),
     onErrorContainer: Color(0xFFFCDADA),
-    background: Color(0xFF0B1220),
-    onBackground: Color(0xFFE6EDF6),
     surface: Color(0xFF0F172A),
     onSurface: Color(0xFFE6EDF6),
-    surfaceVariant: Color(0xFF1F2A3A),
+    surfaceDim: Color(0xFF0B1220),
+    surfaceBright: Color(0xFF1F2A3A),
+    surfaceContainerLowest: Color(0xFF0B1220),
+    surfaceContainerLow: Color(0xFF101827),
+    surfaceContainer: Color(0xFF131D2C),
+    surfaceContainerHigh: Color(0xFF162030),
+    surfaceContainerHighest: Color(0xFF1F2A3A),
     onSurfaceVariant: Color(0xFFA8B3C7),
     outline: Color(0xFF1F2A3A),
     outlineVariant: Color(0xFF273345),
     shadow: Color(0x80000000),
     scrim: Color(0x66000000),
     inverseSurface: Color(0xFFE6EDF6),
+    onInverseSurface: Color(0xFF0B1220),
     inversePrimary: Color(0xFF7CDAC8),
     surfaceTint: Color(0xFF2BB39A),
   );
 
-  final colorTokens = PaisaColorTokens.dark;
+  const colorTokens = PaisaColorTokens.dark;
   final textTheme = PaisaTypography.textTheme(
     colorTokens.textPrimary,
     colorTokens.textSecondary,
@@ -57,7 +62,7 @@ ThemeData buildPaisaTheme() {
       titleTextStyle: textTheme.titleLarge,
       centerTitle: false,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: colorTokens.backgroundSurface,
       elevation: 2,
       margin: EdgeInsets.zero,

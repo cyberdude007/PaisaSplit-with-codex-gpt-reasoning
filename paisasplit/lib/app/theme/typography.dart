@@ -6,7 +6,7 @@ class PaisaTypography {
   static TextTheme textTheme(Color primaryColor, Color secondaryColor) {
     const fontFamily = 'Roboto';
 
-    final base = const TextTheme(
+    const base = TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.w600,
