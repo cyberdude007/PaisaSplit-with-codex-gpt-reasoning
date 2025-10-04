@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_DIR: paisasplit  # <--- change this if your app folder has a different name
+  PROJECT_DIR: paisasplit  # <--- change if your app dir differs
 
 jobs:
   build-android:
@@ -31,6 +31,10 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
+      # 👇 NEW: regenerate/upgrade Android Gradle project for current Flutter
+      - name: Ensure Android scaffolding is up-to-date
+        run: flutter create . --platforms=android
+
       - name: Pub get
         run: flutter pub get
 
@@ -43,8 +47,7 @@ jobs:
       - name: Tests
         run: flutter test
 
-      # Keep these two if you want APK artifacts from CI.
-      # If you are skipping local APK builds in Codex, that's fine — CI still produces them.
+      # Build APKs in CI (you asked to keep this)
       - name: Build DEBUG APK (universal)
         run: flutter build apk --debug
 
