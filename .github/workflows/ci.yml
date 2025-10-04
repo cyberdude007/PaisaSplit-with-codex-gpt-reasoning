@@ -3,9 +3,14 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
+
+# Ensure this permission exists at the workflow level (or repository default)
+permissions:
+  contents: write   # required to create releases
 
 env:
   PROJECT_DIR: paisasplit  # <--- change if your app dir differs
@@ -68,6 +73,42 @@ jobs:
           name: PaisaSplit-APK-${{ github.sha }}
           path: ${{ env.PROJECT_DIR }}/artifacts/*
           retention-days: 14
+  # Add this as a NEW job in the same workflow file, below build-android
+  release-apk:
+    # Only run on tag pushes
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (for changelog/notes if needed)
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: PaisaSplit-APK-${{ github.sha }}
+          path: release-apks
+
+      # Create or update a GitHub Release for this tag and upload APKs
+      - name: Create GitHub Release and upload APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: PaisaSplit ${{ github.ref_name }}
+          body: |
+            APKs for ${{ github.ref_name }}.
+            - Debug (universal) for quick testing
+            - Unsigned per-ABI release builds for distribution/signing
+          draft: false
+          prerelease: false
+          files: |
+            release-apks/PaisaSplit-debug-universal.apk
+            release-apks/PaisaSplit-release-arm64-v8a-UNSIGNED.apk
+            release-apks/PaisaSplit-release-armeabi-v7a-UNSIGNED.apk
+            release-apks/PaisaSplit-release-x86_64-UNSIGNED.apk
+
+        
 
 
       # Optional: Enable this section when signing release builds for tagged versions.
