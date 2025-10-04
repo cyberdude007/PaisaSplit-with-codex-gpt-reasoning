@@ -42,11 +42,19 @@ LazyDatabase _openConnection() {
   ],
 )
 class PaisaSplitDatabase extends _$PaisaSplitDatabase {
-  PaisaSplitDatabase._(super.executor);
+  PaisaSplitDatabase._(super.executor, {bool enableSeeding = true})
+      : _enableSeeding = enableSeeding;
 
-  static final PaisaSplitDatabase _instance = PaisaSplitDatabase._(_openConnection());
+  final bool _enableSeeding;
+
+  static final PaisaSplitDatabase _instance =
+      PaisaSplitDatabase._(_openConnection());
 
   static PaisaSplitDatabase get instance => _instance;
+
+  factory PaisaSplitDatabase.forTesting(QueryExecutor executor) {
+    return PaisaSplitDatabase._(executor, enableSeeding: false);
+  }
 
   @override
   int get schemaVersion => 1;
@@ -63,11 +71,13 @@ class PaisaSplitDatabase extends _$PaisaSplitDatabase {
         },
         beforeOpen: (OpeningDetails details) async {
           await customStatement('PRAGMA foreign_keys = ON');
-          final loader = SeedLoader(
-            database: this,
-            bundle: rootBundle,
-          );
-          await loader.seedIfNeeded();
+          if (_enableSeeding) {
+            final loader = SeedLoader(
+              database: this,
+              bundle: rootBundle,
+            );
+            await loader.seedIfNeeded();
+          }
         },
       );
 

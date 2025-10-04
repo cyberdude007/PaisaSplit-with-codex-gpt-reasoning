@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/accounts/accounts_screen.dart';
+import '../features/accounts/presentation/accounts_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/dashboard/activity_detail_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
