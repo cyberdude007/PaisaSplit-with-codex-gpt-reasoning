@@ -1,28 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PaisaSplitApp extends StatelessWidget {
+import 'app_router.dart';
+import 'theme/theme.dart';
+
+class PaisaSplitApp extends ConsumerWidget {
   const PaisaSplitApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
+    return MaterialApp.router(
       title: 'PaisaSplit',
-      theme: ThemeData.dark(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const _PlaceholderHome(),
-    );
-  }
-}
-
-class _PlaceholderHome extends StatelessWidget {
-  const _PlaceholderHome();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('PaisaSplit'),
-      ),
+      theme: buildPaisaTheme(),
+      routerConfig: router,
     );
   }
 }
