@@ -1,0 +1,30 @@
+{
+  "members": [
+    {"id": "me", "name": "Me"},
+    {"id": "m_anu", "name": "Anu"},
+    {"id": "m_rahul", "name": "Rahul"}
+  ],
+  "groups": [
+    {"id": "g_trip", "name": "Goa Trip", "createdAt": "2025-08-10"}
+  ],
+  "groupMembers": [
+    {"id": "gm1", "groupId": "g_trip", "memberId": "me"},
+    {"id": "gm2", "groupId": "g_trip", "memberId": "m_anu"},
+    {"id": "gm3", "groupId": "g_trip", "memberId": "m_rahul"}
+  ],
+  "accounts": [
+    {"id": "acc_default", "name": "Default Account", "openingBalancePaise": 0}
+  ],
+  "expenses": [
+    {"id": "e1", "groupId": "g_trip", "title": "Hotel", "amountPaise": 450000, "paidByMemberId": "me", "date": "2025-08-11", "category": "Lodging"},
+    {"id": "e2", "groupId": "g_trip", "title": "Dinner", "amountPaise": 120000, "paidByMemberId": "m_anu", "date": "2025-08-11", "category": "Food"}
+  ],
+  "splits": [
+    {"id": "s1", "expenseId": "e1", "memberId": "me", "sharePaise": 150000},
+    {"id": "s2", "expenseId": "e1", "memberId": "m_anu", "sharePaise": 150000},
+    {"id": "s3", "expenseId": "e1", "memberId": "m_rahul", "sharePaise": 150000},
+    {"id": "s4", "expenseId": "e2", "memberId": "me", "sharePaise": 40000},
+    {"id": "s5", "expenseId": "e2", "memberId": "m_anu", "sharePaise": 40000},
+    {"id": "s6", "expenseId": "e2", "memberId": "m_rahul", "sharePaise": 40000}
+  ]
+}
