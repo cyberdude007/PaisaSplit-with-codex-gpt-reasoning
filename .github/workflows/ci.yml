@@ -2,63 +2,70 @@ name: CI
 
 on:
   push:
+    branches: [ main, develop ]
   pull_request:
+    branches: [ main, develop ]
   workflow_dispatch:
 
+env:
+  PROJECT_DIR: paisasplit  # <--- change this if your app folder has a different name
+
 jobs:
-  build:
-    name: Build & Test
+  build-android:
     runs-on: ubuntu-latest
+
     defaults:
       run:
-        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
+      - name: Flutter setup
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Flutter pub get
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Pub get
         run: flutter pub get
 
-      - name: Run build_runner
+      - name: Codegen
         run: dart run build_runner build -d
 
-      - name: Analyze
-        run: dart analyze
+      - name: Analyze (treat warnings as errors)
+        run: dart analyze --fatal-infos --fatal-warnings
 
-      - name: Test
+      - name: Tests
         run: flutter test
 
-      - name: Build debug APK
+      # Keep these two if you want APK artifacts from CI.
+      # If you are skipping local APK builds in Codex, that's fine — CI still produces them.
+      - name: Build DEBUG APK (universal)
         run: flutter build apk --debug
 
-      - name: Build release APKs (per ABI)
+      - name: Build RELEASE APKs (per-ABI, unsigned)
         run: flutter build apk --release --split-per-abi
 
-      - name: Prepare APK artifacts
+      - name: Collect artifacts
         run: |
-          ARTIFACT_DIR="build/ci-artifacts"
-          mkdir -p "${ARTIFACT_DIR}"
-          cp build/app/outputs/flutter-apk/app-debug.apk "${ARTIFACT_DIR}/PaisaSplit-debug-universal.apk"
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "${ARTIFACT_DIR}/PaisaSplit-release-armeabi-v7a.apk"
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "${ARTIFACT_DIR}/PaisaSplit-release-arm64-v8a.apk"
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk "${ARTIFACT_DIR}/PaisaSplit-release-x86_64.apk"
+          mkdir -p artifacts
+          cp build/app/outputs/flutter-apk/app-debug.apk artifacts/PaisaSplit-debug-universal.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk artifacts/PaisaSplit-release-arm64-v8a-UNSIGNED.apk || true
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk artifacts/PaisaSplit-release-armeabi-v7a-UNSIGNED.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk artifacts/PaisaSplit-release-x86_64-UNSIGNED.apk || true
 
-      - name: Upload APK artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: PaisaSplit-APK-${{ github.sha }}
-          path: build/ci-artifacts/
+          path: ${{ env.PROJECT_DIR }}/artifacts/*
+          retention-days: 14
+
 
       # Optional: Enable this section when signing release builds for tagged versions.
       # - name: Build signed release APKs
