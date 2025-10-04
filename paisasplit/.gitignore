@@ -11,8 +11,9 @@ build/
 .melos_tool/
 
 # Generated files
-lib/gen/
+lib/gen/*
 !lib/gen/.gitkeep
+!lib/gen/db.g.dart
 
 # iOS
 ios/Flutter/Flutter.framework
