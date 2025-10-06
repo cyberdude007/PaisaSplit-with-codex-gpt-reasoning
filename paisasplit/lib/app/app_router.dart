@@ -6,7 +6,7 @@ import '../features/accounts/presentation/accounts_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/dashboard/activity_detail_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
-import '../features/expenses/new_expense_screen.dart';
+import '../features/expenses/presentation/new_expense_screen.dart';
 import '../features/groups/add_member_screen.dart';
 import '../features/groups/group_detail_screen.dart';
 import '../features/groups/group_settings_screen.dart';
