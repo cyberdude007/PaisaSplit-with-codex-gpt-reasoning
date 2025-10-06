@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/accounts/presentation/accounts_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/dashboard/activity_detail_screen.dart';
-import '../features/dashboard/dashboard_screen.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/expenses/presentation/new_expense_screen.dart';
 import '../features/groups/add_member_screen.dart';
 import '../features/groups/group_detail_screen.dart';
@@ -33,16 +33,21 @@ enum AppRoute {
 }
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final _dashboardNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'dashboardBranch');
-final _groupsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'groupsBranch');
-final _analyticsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'analyticsBranch');
-final _accountsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'accountsBranch');
-final _settingsNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'settingsBranch');
+final _dashboardNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'dashboardBranch',
+);
+final _groupsNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'groupsBranch',
+);
+final _analyticsNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'analyticsBranch',
+);
+final _accountsNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'accountsBranch',
+);
+final _settingsNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'settingsBranch',
+);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -116,9 +121,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoute.settleUp.path,
         name: AppRoute.settleUp.name,
-        builder: (context, state) => SettleUpScreen(
-          groupId: state.pathParameters['groupId'] ?? '',
-        ),
+        builder: (context, state) =>
+            SettleUpScreen(groupId: state.pathParameters['groupId'] ?? ''),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
@@ -132,25 +136,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoute.groupDetail.path,
         name: AppRoute.groupDetail.name,
-        builder: (context, state) => GroupDetailScreen(
-          groupId: state.pathParameters['groupId'] ?? '',
-        ),
+        builder: (context, state) =>
+            GroupDetailScreen(groupId: state.pathParameters['groupId'] ?? ''),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoute.addMember.path,
         name: AppRoute.addMember.name,
-        builder: (context, state) => AddMemberScreen(
-          groupId: state.pathParameters['groupId'] ?? '',
-        ),
+        builder: (context, state) =>
+            AddMemberScreen(groupId: state.pathParameters['groupId'] ?? ''),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoute.groupSettings.path,
         name: AppRoute.groupSettings.name,
-        builder: (context, state) => GroupSettingsScreen(
-          groupId: state.pathParameters['groupId'] ?? '',
-        ),
+        builder: (context, state) =>
+            GroupSettingsScreen(groupId: state.pathParameters['groupId'] ?? ''),
       ),
     ],
   );
