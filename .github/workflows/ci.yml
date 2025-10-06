@@ -3,17 +3,16 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
 
-# Ensure this permission exists at the workflow level (or repository default)
+# needed for creating Releases
 permissions:
-  contents: write   # required to create releases
+  contents: write
 
 env:
-  PROJECT_DIR: paisasplit  # <--- change if your app dir differs
+  PROJECT_DIR: paisasplit  # <<--- CHANGE if your app folder name differs
 
 jobs:
   build-android:
@@ -36,7 +35,7 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-      # 👇 NEW: regenerate/upgrade Android Gradle project for current Flutter
+      # Keeps Android/Gradle scaffolding compatible with the runner's Flutter
       - name: Ensure Android scaffolding is up-to-date
         run: flutter create . --platforms=android
 
@@ -46,53 +45,39 @@ jobs:
       - name: Codegen
         run: dart run build_runner build -d
 
-      - name: Analyze (treat warnings as errors)
+      - name: Analyze (warnings = errors)
         run: dart analyze --fatal-infos --fatal-warnings
 
       - name: Tests
         run: flutter test
 
-      # Build APKs in CI (you asked to keep this)
+      # ---- BUILD DEBUG APK ONLY ----
       - name: Build DEBUG APK (universal)
         run: flutter build apk --debug
 
-      - name: Build RELEASE APKs (per-ABI, unsigned)
-        run: flutter build apk --release --split-per-abi
-
-      - name: Collect artifacts
-        run: |
-          mkdir -p artifacts
-          cp build/app/outputs/flutter-apk/app-debug.apk artifacts/PaisaSplit-debug-universal.apk
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk artifacts/PaisaSplit-release-arm64-v8a-UNSIGNED.apk || true
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk artifacts/PaisaSplit-release-armeabi-v7a-UNSIGNED.apk || true
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk artifacts/PaisaSplit-release-x86_64-UNSIGNED.apk || true
-
-      - name: Upload artifacts
+      # Optional: keep artifact for PR view
+      - name: Upload artifact (debug APK)
         uses: actions/upload-artifact@v4
         with:
-          name: PaisaSplit-APK-${{ github.sha }}
-          path: ${{ env.PROJECT_DIR }}/artifacts/*
-          retention-days: 14
-          
-      - name: Create GitHub Release for this run (fast CDN downloads)
+          name: PaisaSplit-debug-${{ github.sha }}
+          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+      # ---- FAST DOWNLOADS: publish debug APK to a Release per run ----
+      # Note: GitHub will also show the auto "Source code" zips; that's normal.
+      - name: Create GitHub Release for this run (attach debug APK)
         if: ${{ success() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ci-${{ github.run_id }}                         # auto tag per run (no manual push)
-          name: PaisaSplit CI Build ${{ github.run_number }}        # human-friendly title
+          tag_name: ci-${{ github.run_id }}                      # auto tag (no manual push)
+          name: PaisaSplit CI Build ${{ github.run_number }}     # human title
           body: |
-            Auto release for run ${{ github.run_id }} on ref `${{ github.ref_name }}`.
-            APKs:
-            - Debug (universal)
-            - Unsigned per-ABI release builds
+            Debug APK for run ${{ github.run_id }} on `${{ github.ref_name }}`.
+            Install on device for quick testing.
           draft: false
-          prerelease: true                                          # mark as pre-release to avoid cluttering stable releases
+          prerelease: true
           files: |
-            artifacts/PaisaSplit-debug-universal.apk
-            artifacts/PaisaSplit-release-arm64-v8a-UNSIGNED.apk
-            artifacts/PaisaSplit-release-armeabi-v7a-UNSIGNED.apk
-            artifacts/PaisaSplit-release-x86_64-UNSIGNED.apk
-
+            ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-debug.apk
         
 
 
