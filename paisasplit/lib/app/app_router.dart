@@ -12,7 +12,7 @@ import '../features/groups/group_detail_screen.dart';
 import '../features/groups/group_settings_screen.dart';
 import '../features/groups/groups_screen.dart';
 import '../features/settle/presentation/settle_up_screen.dart';
-import '../features/settings/settings_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import 'theme/colors.dart';
 
 enum AppRoute {
