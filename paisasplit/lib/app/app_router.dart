@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/accounts/presentation/accounts_screen.dart';
-import '../features/analytics/analytics_screen.dart';
+import '../features/analytics/presentation/analytics_screen.dart';
 import '../features/dashboard/activity_detail_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/expenses/presentation/new_expense_screen.dart';
