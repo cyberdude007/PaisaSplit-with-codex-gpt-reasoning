@@ -21,11 +21,25 @@ void main() {
     expect(formatted, '₹1,23,456.00');
   });
 
+  test('formats negative INR values with leading minus', () {
+    const amountInPaise = -9876540; // -₹98,765.40
+    final formatted = formatCurrencyFromPaise(amountInPaise);
+
+    expect(formatted, '-₹98,765.40');
+  });
+
   test('formats compact INR currency using lakh shorthand', () {
     const amountInPaise = 12345600; // ₹1.2L
     final formatted = formatCompactCurrency(amountInPaise);
 
     expect(formatted, '₹1.2L');
+  });
+
+  test('formats compact INR currency using crore shorthand with sign', () {
+    const amountInPaise = -2500000000; // -₹2.5Cr
+    final formatted = formatCompactCurrency(amountInPaise);
+
+    expect(formatted, '-₹2.5Cr');
   });
 
   test('formats dates using DD MMM YYYY pattern', () {
