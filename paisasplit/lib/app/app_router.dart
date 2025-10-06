@@ -11,7 +11,7 @@ import '../features/groups/add_member_screen.dart';
 import '../features/groups/group_detail_screen.dart';
 import '../features/groups/group_settings_screen.dart';
 import '../features/groups/groups_screen.dart';
-import '../features/settle/settle_up_screen.dart';
+import '../features/settle/presentation/settle_up_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'theme/colors.dart';
 
@@ -24,7 +24,7 @@ enum AppRoute {
   settings('/settings'),
   addMember('/groups/:groupId/add-member'),
   newExpense('/expenses/new'),
-  settleUp('/settle-up'),
+  settleUp('/groups/:groupId/settle-up'),
   activityDetail('/activity/:activityId'),
   groupSettings('/groups/:groupId/settings');
 
@@ -116,7 +116,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: AppRoute.settleUp.path,
         name: AppRoute.settleUp.name,
-        builder: (context, state) => const SettleUpScreen(),
+        builder: (context, state) => SettleUpScreen(
+          groupId: state.pathParameters['groupId'] ?? '',
+        ),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
