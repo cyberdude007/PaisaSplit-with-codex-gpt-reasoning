@@ -4,17 +4,26 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:paisasplit/data/db.dart';
 import 'package:paisasplit/features/accounts/data/account_repo.dart';
+import 'package:paisasplit/features/expenses/data/expense_models.dart';
+import 'package:paisasplit/features/expenses/data/expense_repository.dart';
 import 'package:paisasplit/features/settle/data/settle_repository.dart';
 
 void main() {
   late PaisaSplitDatabase db;
   late SettleRepository repository;
+  late ExpenseRepository expenseRepository;
   final now = DateTime(2025, 1, 1, 10, 0);
   final idQueue = <String>[];
 
   setUp(() {
+    idQueue.clear();
     db = PaisaSplitDatabase.forTesting(NativeDatabase.memory());
     repository = SettleRepository(
+      db,
+      idGenerator: () => idQueue.removeAt(0),
+      nowBuilder: () => now,
+    );
+    expenseRepository = ExpenseRepository(
       db,
       idGenerator: () => idQueue.removeAt(0),
       nowBuilder: () => now,
@@ -27,10 +36,15 @@ void main() {
 
   group('Group balance computations', () {
     setUp(() async {
-      await _seedCoreData(db);
+      await _seedBaseData(db);
     });
 
     test('matches PRD worked example before settlements', () async {
+      await _createWorkedExampleExpenses(
+        repository: expenseRepository,
+        idQueue: idQueue,
+      );
+
       final summary = await repository.fetchGroupBalances('g_trip');
       expect(summary.totalToReceivePaise, 260000);
       expect(summary.totalToPayPaise, 260000);
@@ -39,11 +53,35 @@ void main() {
         for (final balance in summary.memberBalances) balance.memberId: balance,
       };
       expect(byMember['me']?.netBalancePaise, 260000);
-      expect(byMember['m_anu']?.netBalancePaise, -70000);
+      expect(
+        byMember['m_anu']?.netBalancePaise,
+        -70000,
+        reason:
+            'TODO(PRD v1.1 §12): spec lists -₹1,100 but provided sample splits sum to -₹700.',
+      );
       expect(byMember['m_rahul']?.netBalancePaise, -190000);
+
+      final ledgerForHotel = await (db.select(
+        db.accountTxns,
+      )..where((tbl) => tbl.relatedExpenseId.equals('e1')))
+          .get();
+      expect(ledgerForHotel, hasLength(1));
+      expect(ledgerForHotel.single.amountPaise, -450000);
+      expect(ledgerForHotel.single.type, 'expensePayment');
+
+      final ledgerForDinner = await (db.select(
+        db.accountTxns,
+      )..where((tbl) => tbl.relatedExpenseId.equals('e2')))
+          .get();
+      expect(ledgerForDinner, isEmpty);
     });
 
     test('records manual settlement and updates ledgers', () async {
+      await _createWorkedExampleExpenses(
+        repository: expenseRepository,
+        idQueue: idQueue,
+      );
+
       idQueue.addAll(['settlement_1', 'txn_1']);
 
       await repository.recordManualSettlement(
@@ -63,7 +101,12 @@ void main() {
       expect(summary.totalToPayPaise, 110000);
       expect(byMember['me']?.netBalancePaise, 110000);
       expect(byMember['m_rahul']?.netBalancePaise, -40000);
-      expect(byMember['m_anu']?.netBalancePaise, -70000);
+      expect(
+        byMember['m_anu']?.netBalancePaise,
+        -70000,
+        reason:
+            'TODO(PRD v1.1 §12): spec lists -₹1,100 but provided sample splits sum to -₹700.',
+      );
 
       final settlement = await (db.select(
         db.settlements,
@@ -83,7 +126,7 @@ void main() {
   });
 }
 
-Future<void> _seedCoreData(PaisaSplitDatabase db) async {
+Future<void> _seedBaseData(PaisaSplitDatabase db) async {
   await db
       .into(db.members)
       .insert(MembersCompanion.insert(id: 'me', name: 'Me'));
@@ -132,79 +175,57 @@ Future<void> _seedCoreData(PaisaSplitDatabase db) async {
         ),
       );
 
-  await db.into(db.expenses).insert(
-        ExpensesCompanion.insert(
-          id: 'e1',
-          groupId: 'g_trip',
-          title: 'Hotel',
-          amountPaise: 450000,
-          paidByMemberId: 'me',
-          date: DateTime(2025, 8, 11),
-          category: 'Lodging',
-          notes: const Value.absent(),
-          isDeleted: const Value(false),
-        ),
-      );
-  await db.into(db.expenses).insert(
-        ExpensesCompanion.insert(
-          id: 'e2',
-          groupId: 'g_trip',
-          title: 'Dinner',
-          amountPaise: 120000,
-          paidByMemberId: 'm_anu',
-          date: DateTime(2025, 8, 11),
-          category: 'Food',
-          notes: const Value.absent(),
-          isDeleted: const Value(false),
-        ),
-      );
+}
 
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's1',
-          expenseId: 'e1',
-          memberId: 'me',
-          sharePaise: 150000,
-        ),
-      );
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's2',
-          expenseId: 'e1',
-          memberId: 'm_anu',
-          sharePaise: 150000,
-        ),
-      );
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's3',
-          expenseId: 'e1',
-          memberId: 'm_rahul',
-          sharePaise: 150000,
-        ),
-      );
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's4',
-          expenseId: 'e2',
-          memberId: 'me',
-          sharePaise: 40000,
-        ),
-      );
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's5',
-          expenseId: 'e2',
-          memberId: 'm_anu',
-          sharePaise: 40000,
-        ),
-      );
-  await db.into(db.expenseSplits).insert(
-        ExpenseSplitsCompanion.insert(
-          id: 's6',
-          expenseId: 'e2',
-          memberId: 'm_rahul',
-          sharePaise: 40000,
-        ),
-      );
+Future<void> _createWorkedExampleExpenses({
+  required ExpenseRepository repository,
+  required List<String> idQueue,
+}) async {
+  idQueue.addAll([
+    's1',
+    's2',
+    's3',
+    'txn_e1',
+    's4',
+    's5',
+    's6',
+  ]);
+
+  await repository.createExpense(
+    ExpenseDraft(
+      id: 'e1',
+      groupId: 'g_trip',
+      title: 'Hotel',
+      amountPaise: 450000,
+      category: 'Lodging',
+      paidByMemberId: 'me',
+      date: DateTime(2025, 8, 11),
+      accountId: AccountRepository.defaultAccountId,
+      notes: null,
+      splits: const [
+        ExpenseSplitShareInput(memberId: 'me', sharePaise: 150000),
+        ExpenseSplitShareInput(memberId: 'm_anu', sharePaise: 150000),
+        ExpenseSplitShareInput(memberId: 'm_rahul', sharePaise: 150000),
+      ],
+    ),
+  );
+
+  await repository.createExpense(
+    ExpenseDraft(
+      id: 'e2',
+      groupId: 'g_trip',
+      title: 'Dinner',
+      amountPaise: 120000,
+      category: 'Food',
+      paidByMemberId: 'm_anu',
+      date: DateTime(2025, 8, 11),
+      accountId: AccountRepository.defaultAccountId,
+      notes: null,
+      splits: const [
+        ExpenseSplitShareInput(memberId: 'me', sharePaise: 40000),
+        ExpenseSplitShareInput(memberId: 'm_anu', sharePaise: 40000),
+        ExpenseSplitShareInput(memberId: 'm_rahul', sharePaise: 40000),
+      ],
+    ),
+  );
 }
